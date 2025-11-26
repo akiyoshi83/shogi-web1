@@ -19,8 +19,8 @@ export function createInitialBoard(): Board {
   })
 
   // 後手の飛車と角
-  board[1][7] = createPiece('rook', 'gote')
-  board[1][1] = createPiece('bishop', 'gote')
+  board[1][1] = createPiece('rook', 'gote')
+  board[1][7] = createPiece('bishop', 'gote')
 
   // 後手の歩
   for (let col = 0; col < 9; col++) {
@@ -34,8 +34,8 @@ export function createInitialBoard(): Board {
   })
 
   // 先手の飛車と角
-  board[7][1] = createPiece('rook', 'sente')
-  board[7][7] = createPiece('bishop', 'sente')
+  board[7][7] = createPiece('rook', 'sente')
+  board[7][1] = createPiece('bishop', 'sente')
 
   // 先手の歩
   for (let col = 0; col < 9; col++) {
