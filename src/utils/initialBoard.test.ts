@@ -29,28 +29,28 @@ describe('createInitialBoard', () => {
   })
 
   it('should place sente rook at correct position', () => {
-    const rook = board[7][1]
+    const rook = board[7][7]
     expect(rook).not.toBeNull()
     expect(rook?.type).toBe('rook')
     expect(rook?.player).toBe('sente')
   })
 
   it('should place gote rook at correct position', () => {
-    const rook = board[1][7]
+    const rook = board[1][1]
     expect(rook).not.toBeNull()
     expect(rook?.type).toBe('rook')
     expect(rook?.player).toBe('gote')
   })
 
   it('should place sente bishop at correct position', () => {
-    const bishop = board[7][7]
+    const bishop = board[7][1]
     expect(bishop).not.toBeNull()
     expect(bishop?.type).toBe('bishop')
     expect(bishop?.player).toBe('sente')
   })
 
   it('should place gote bishop at correct position', () => {
-    const bishop = board[1][1]
+    const bishop = board[1][7]
     expect(bishop).not.toBeNull()
     expect(bishop?.type).toBe('bishop')
     expect(bishop?.player).toBe('gote')
