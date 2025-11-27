@@ -23,9 +23,9 @@ const pieceToJapanese: Record<string, string> = {
 // 成り駒の表記
 const promotedPieceToJapanese: Record<string, string> = {
   pawn: 'と',
-  lance: '成香',
-  knight: '成桂',
-  silver: '成銀',
+  lance: '杏',
+  knight: '圭',
+  silver: '全',
   bishop: '馬',
   rook: '竜',
 }
