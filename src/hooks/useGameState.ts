@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { Board, Position, Player, GameState, CapturedPieces, PieceType } from '../types/shogi'
+import type { Board, Position, Player, CapturedPieces, CapturablePieceType } from '../types/shogi'
 import { createInitialBoard } from '../utils/initialBoard'
 import { getValidMoves } from '../utils/moveRules'
 import { canPromote } from '../utils/promotion'
@@ -23,11 +23,11 @@ export function useGameState() {
   const [capturedByGote, setCapturedByGote] = useState<CapturedPieces>(initialCapturedPieces)
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null)
   const [validMoves, setValidMoves] = useState<Position[]>([])
-  const [selectedDropPiece, setSelectedDropPiece] = useState<PieceType | null>(null)
+  const [selectedDropPiece, setSelectedDropPiece] = useState<CapturablePieceType | null>(null)
   const [isGameOver, setIsGameOver] = useState(false)
   const [winner, setWinner] = useState<Player | null>(null)
 
-  const selectDropPiece = useCallback((pieceType: PieceType) => {
+  const selectDropPiece = useCallback((pieceType: CapturablePieceType) => {
     setSelectedPosition(null)
     setSelectedDropPiece(pieceType)
     setValidMoves(getDropPositions(board, pieceType, currentPlayer))
@@ -111,8 +111,9 @@ export function useGameState() {
         if (!movingPiece) return
 
         // 駒を取った場合、持ち駒に追加（成り駒は成りを解除）
-        if (capturedPiece) {
-          const pieceType = capturedPiece.type
+        // 玉は取れない（ゲーム終了）ので、ここでは CapturablePieceType として扱う
+        if (capturedPiece && capturedPiece.type !== 'king') {
+          const pieceType = capturedPiece.type as CapturablePieceType
           if (currentPlayer === 'sente') {
             setCapturedBySente(prev => ({
               ...prev,

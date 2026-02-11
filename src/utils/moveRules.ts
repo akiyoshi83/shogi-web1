@@ -1,4 +1,4 @@
-import type { Board, Position, Piece, PieceType, Player } from '../types/shogi'
+import type { Board, Position, Piece, Player } from '../types/shogi'
 
 // 位置が盤面内かチェック
 function isValidPosition(pos: Position): boolean {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { canDropPiece } from './dropRules'
-import type { Board, PieceType, Player } from '../types/shogi'
+import type { Board } from '../types/shogi'
 
 describe('Drop Rules', () => {
   let emptyBoard: Board

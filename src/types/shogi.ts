@@ -1,5 +1,5 @@
-// 駒の種類
-export type PieceType =
+// 持ち駒にできる駒の種類（玉以外）
+export type CapturablePieceType =
   | 'pawn'      // 歩
   | 'lance'     // 香
   | 'knight'    // 桂
@@ -7,7 +7,9 @@ export type PieceType =
   | 'gold'      // 金
   | 'bishop'    // 角
   | 'rook'      // 飛
-  | 'king'      // 玉
+
+// 駒の種類
+export type PieceType = CapturablePieceType | 'king'  // 玉
 
 // プレイヤー
 export type Player = 'sente' | 'gote'  // 先手 | 後手

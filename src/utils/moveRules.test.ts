@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { getValidMoves } from './moveRules'
 import { createInitialBoard } from './initialBoard'
-import type { Board, Position, Piece } from '../types/shogi'
+import type { Board, Position } from '../types/shogi'
 
 describe('Move Rules', () => {
   describe('Pawn (歩)', () => {

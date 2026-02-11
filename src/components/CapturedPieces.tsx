@@ -1,14 +1,14 @@
-import type { CapturedPieces as CapturedPiecesType, PieceType } from '../types/shogi'
+import type { CapturedPieces as CapturedPiecesType, CapturablePieceType } from '../types/shogi'
 import './CapturedPieces.css'
 
 interface CapturedPiecesProps {
   capturedPieces: CapturedPiecesType
   player: 'sente' | 'gote'
-  onPieceClick?: (pieceType: PieceType) => void
+  onPieceClick?: (pieceType: CapturablePieceType) => void
   isCurrentPlayer: boolean
 }
 
-const pieceToJapanese: Record<PieceType, string> = {
+const pieceToJapanese: Record<CapturablePieceType, string> = {
   pawn: '歩',
   lance: '香',
   knight: '桂',
@@ -16,10 +16,9 @@ const pieceToJapanese: Record<PieceType, string> = {
   gold: '金',
   bishop: '角',
   rook: '飛',
-  king: '玉',
 }
 
-const pieceOrder: PieceType[] = ['rook', 'bishop', 'gold', 'silver', 'knight', 'lance', 'pawn']
+const pieceOrder: CapturablePieceType[] = ['rook', 'bishop', 'gold', 'silver', 'knight', 'lance', 'pawn']
 
 function CapturedPieces({ capturedPieces, player, onPieceClick, isCurrentPlayer }: CapturedPiecesProps) {
   return (
