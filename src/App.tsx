@@ -13,6 +13,7 @@ function App() {
     validMoves,
     isGameOver,
     winner,
+    inCheck,
     selectSquare,
     selectDropPiece,
     resetGame,
@@ -30,6 +31,7 @@ function App() {
         ) : (
           <p className="turn-indicator">
             {currentPlayer === 'sente' ? '▲ 先手の番です' : '△ 後手の番です'}
+            {inCheck && <span className="check-indicator"> - 王手！</span>}
           </p>
         )}
         <button onClick={resetGame} className="reset-button">

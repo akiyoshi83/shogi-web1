@@ -27,6 +27,10 @@ h1 {
   color: #1976d2;
 }
 
+.check-indicator {
+  color: #d32f2f;
+}
+
 .game-over {
   font-size: 1.8rem;
   font-weight: bold;
