@@ -1,0 +1,118 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - '**'
+  delete:
+
+permissions:
+  contents: write
+
+jobs:
+  # main ブランチのデプロイ
+  deploy-main:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy-main
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx vitest --run
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /shogi-web1/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          keep_files: true
+
+  # ブランチプレビューのデプロイ
+  deploy-branch:
+    if: github.event_name == 'push' && github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy-${{ github.ref_name }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sanitize branch name
+        id: branch
+        run: |
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+          SAFE_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          echo "safe_name=$SAFE_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npx vitest --run
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /shogi-web1/branch/${{ steps.branch.outputs.safe_name }}/
+
+      - name: Deploy branch preview to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          destination_dir: branch/${{ steps.branch.outputs.safe_name }}
+
+  # ブランチ削除時のクリーンアップ
+  cleanup-branch:
+    if: github.event_name == 'delete'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+
+      - name: Sanitize branch name
+        id: branch
+        run: |
+          BRANCH_NAME="${{ github.event.ref }}"
+          SAFE_BRANCH=$(echo "$BRANCH_NAME" | sed 's/[^a-zA-Z0-9._-]/-/g')
+          echo "safe_name=$SAFE_BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Remove branch preview directory
+        run: |
+          if [ -d "branch/${{ steps.branch.outputs.safe_name }}" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git rm -rf "branch/${{ steps.branch.outputs.safe_name }}"
+            git commit -m "Clean up preview for deleted branch: ${{ github.event.ref }}"
+            git push
+          else
+            echo "No preview directory found for branch: ${{ steps.branch.outputs.safe_name }}"
+          fi
