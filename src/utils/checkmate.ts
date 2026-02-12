@@ -52,50 +52,68 @@ function wouldBeInCheck(board: Board, from: Position, to: Position, player: Play
   return isInCheck(newBoard, player)
 }
 
-// 持ち駒の打ち込みをシミュレートし、打った後に自玉が王手になるか判定
-function wouldBeInCheckAfterDrop(board: Board, pieceType: PieceType, to: Position, player: Player): boolean {
-  const newBoard = board.map(row => [...row])
-  newBoard[to.row][to.col] = { type: pieceType, player, isPromoted: false }
-  return isInCheck(newBoard, player)
-}
-
-// 自玉を王手に晒さない合法手のみを返す
+// 合法手を返す（王将のみ王手回避フィルタを適用、他の駒はそのまま）
 export function getLegalMoves(board: Board, from: Position): Position[] {
   const piece = board[from.row][from.col]
   if (!piece) return []
   const moves = getValidMoves(board, from)
-  return moves.filter(to => !wouldBeInCheck(board, from, to, piece.player))
+  if (piece.type === 'king') {
+    return moves.filter(to => !wouldBeInCheck(board, from, to, piece.player))
+  }
+  return moves
 }
 
-// 自玉を王手に晒さない合法な打ち込み先のみを返す
+// 持ち駒の打ち込み先を返す（打ち込みルールのみ適用）
 export function getLegalDropPositions(board: Board, pieceType: CapturablePieceType, player: Player): Position[] {
-  const positions = getDropPositions(board, pieceType, player)
-  return positions.filter(to => !wouldBeInCheckAfterDrop(board, pieceType, to, player))
+  return getDropPositions(board, pieceType, player)
+}
+
+// 移動後に王手が解消されるか判定（詰み判定用）
+function resolvesCheck(board: Board, from: Position, to: Position, player: Player): boolean {
+  const newBoard = board.map(row => [...row])
+  newBoard[to.row][to.col] = newBoard[from.row][from.col]
+  newBoard[from.row][from.col] = null
+  return !isInCheck(newBoard, player)
+}
+
+// 打ち込み後に王手が解消されるか判定（詰み判定用）
+function dropResolvesCheck(board: Board, pieceType: PieceType, to: Position, player: Player): boolean {
+  const newBoard = board.map(row => [...row])
+  newBoard[to.row][to.col] = { type: pieceType, player, isPromoted: false }
+  return !isInCheck(newBoard, player)
 }
 
 // 指定プレイヤーが詰みかどうかを判定
-// 条件: 王手されている AND 合法手が一つも存在しない
+// 条件: 王手されている AND 王手を解消する手が一つも存在しない
 export function isCheckmate(board: Board, player: Player, capturedPieces: CapturedPieces): boolean {
   // 王手されていなければ詰みではない
   if (!isInCheck(board, player)) return false
 
-  // 全ての自駒の合法手を調べる
+  // 全ての自駒について、王手を解消する手があるか調べる
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
       const piece = board[row][col]
       if (piece && piece.player === player) {
-        const legalMoves = getLegalMoves(board, { row, col })
-        if (legalMoves.length > 0) return false
+        const moves = getValidMoves(board, { row, col })
+        for (const to of moves) {
+          if (resolvesCheck(board, { row, col }, to, player)) {
+            return false
+          }
+        }
       }
     }
   }
 
-  // 持ち駒の打ち込みで王手を解除できるか調べる
+  // 持ち駒の打ち込みで王手を解消できるか調べる
   const pieceTypes: CapturablePieceType[] = ['pawn', 'lance', 'knight', 'silver', 'gold', 'bishop', 'rook']
   for (const pieceType of pieceTypes) {
     if (capturedPieces[pieceType] > 0) {
-      const dropPositions = getLegalDropPositions(board, pieceType, player)
-      if (dropPositions.length > 0) return false
+      const positions = getDropPositions(board, pieceType, player)
+      for (const to of positions) {
+        if (dropResolvesCheck(board, pieceType, to, player)) {
+          return false
+        }
+      }
     }
   }
 
