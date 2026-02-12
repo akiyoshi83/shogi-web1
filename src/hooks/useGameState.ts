@@ -1,10 +1,8 @@
 import { useState, useCallback } from 'react'
 import type { Board, Position, Player, CapturedPieces, CapturablePieceType } from '../types/shogi'
 import { createInitialBoard } from '../utils/initialBoard'
-import { getValidMoves } from '../utils/moveRules'
 import { canPromote } from '../utils/promotion'
-import { getDropPositions } from '../utils/dropRules'
-import { isKingCaptured } from '../utils/checkmate'
+import { getLegalMoves, getLegalDropPositions, isCheckmate, isInCheck } from '../utils/checkmate'
 
 const initialCapturedPieces: CapturedPieces = {
   pawn: 0,
@@ -30,7 +28,7 @@ export function useGameState() {
   const selectDropPiece = useCallback((pieceType: CapturablePieceType) => {
     setSelectedPosition(null)
     setSelectedDropPiece(pieceType)
-    setValidMoves(getDropPositions(board, pieceType, currentPlayer))
+    setValidMoves(getLegalDropPositions(board, pieceType, currentPlayer))
   }, [board, currentPlayer])
 
   const selectSquare = useCallback((position: Position) => {
@@ -67,9 +65,10 @@ export function useGameState() {
         setSelectedDropPiece(null)
         setValidMoves([])
 
-        // 勝敗判定
+        // 勝敗判定（詰み判定）
         const nextPlayer = currentPlayer === 'sente' ? 'gote' : 'sente'
-        if (isKingCaptured(newBoard, nextPlayer)) {
+        const nextCaptured = nextPlayer === 'sente' ? capturedBySente : capturedByGote
+        if (isCheckmate(newBoard, nextPlayer, nextCaptured)) {
           setIsGameOver(true)
           setWinner(currentPlayer)
         } else {
@@ -149,9 +148,10 @@ export function useGameState() {
         setSelectedPosition(null)
         setValidMoves([])
 
-        // 勝敗判定
+        // 勝敗判定（詰み判定）
         const nextPlayer = currentPlayer === 'sente' ? 'gote' : 'sente'
-        if (isKingCaptured(newBoard, nextPlayer)) {
+        const nextCaptured = nextPlayer === 'sente' ? capturedBySente : capturedByGote
+        if (isCheckmate(newBoard, nextPlayer, nextCaptured)) {
           setIsGameOver(true)
           setWinner(currentPlayer)
         } else {
@@ -164,12 +164,12 @@ export function useGameState() {
     // 新しい駒を選択
     if (piece && piece.player === currentPlayer) {
       setSelectedPosition(position)
-      setValidMoves(getValidMoves(board, position))
+      setValidMoves(getLegalMoves(board, position))
     } else {
       setSelectedPosition(null)
       setValidMoves([])
     }
-  }, [board, selectedPosition, selectedDropPiece, validMoves, currentPlayer])
+  }, [board, selectedPosition, selectedDropPiece, validMoves, currentPlayer, capturedBySente, capturedByGote])
 
   const resetGame = useCallback(() => {
     setBoard(createInitialBoard())
@@ -183,6 +183,8 @@ export function useGameState() {
     setWinner(null)
   }, [])
 
+  const inCheck = isInCheck(board, currentPlayer)
+
   return {
     board,
     currentPlayer,
@@ -193,6 +195,7 @@ export function useGameState() {
     validMoves,
     isGameOver,
     winner,
+    inCheck,
     selectSquare,
     selectDropPiece,
     resetGame,
