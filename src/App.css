@@ -14,7 +14,7 @@ h1 {
 }
 
 .game-info {
-  margin-bottom: 1.5rem;
+  grid-area: info;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -44,6 +44,7 @@ h1 {
 }
 
 .reset-button {
+  margin-bottom: 1.5rem;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: bold;
@@ -64,8 +65,25 @@ h1 {
 }
 
 .game-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "gote  board sente"
+    ".     info  .";
+  gap: 0.5rem;
+}
+
+.game-container .board {
+  grid-area: board;
+}
+
+.game-container .captured-pieces.gote {
+  grid-area: gote;
+  align-self: start;
+}
+
+.game-container .captured-pieces.sente {
+  grid-area: sente;
+  align-self: end;
 }

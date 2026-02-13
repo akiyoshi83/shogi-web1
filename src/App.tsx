@@ -23,21 +23,9 @@ function App() {
     <div className="app">
       <h1>将棋</h1>
 
-      <div className="game-info">
-        {isGameOver ? (
-          <p className="game-over">
-            🎉 {winner === 'sente' ? '先手' : '後手'}の勝ちです！
-          </p>
-        ) : (
-          <p className="turn-indicator">
-            {currentPlayer === 'sente' ? '▲ 先手の番です' : '△ 後手の番です'}
-            {inCheck && <span className="check-indicator"> - 王手！</span>}
-          </p>
-        )}
-        <button onClick={resetGame} className="reset-button">
-          新しいゲーム
-        </button>
-      </div>
+      <button onClick={resetGame} className="reset-button">
+        新しいゲーム
+      </button>
 
       <div className="game-container">
         <CapturedPieces
@@ -60,6 +48,19 @@ function App() {
           onPieceClick={selectDropPiece}
           isCurrentPlayer={currentPlayer === 'sente'}
         />
+
+        <div className="game-info">
+          {isGameOver ? (
+            <p className="game-over">
+              🎉 {winner === 'sente' ? '先手' : '後手'}の勝ちです！
+            </p>
+          ) : (
+            <p className="turn-indicator">
+              {currentPlayer === 'sente' ? '▲ 先手の番です' : '△ 後手の番です'}
+              {inCheck && <span className="check-indicator"> - 王手！</span>}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

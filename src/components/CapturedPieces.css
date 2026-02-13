@@ -1,32 +1,32 @@
 .captured-pieces {
-  margin: 1rem 0;
-  padding: 1rem;
+  padding: 0.75rem;
   background-color: #f5f5f5;
   border-radius: 8px;
-  min-width: 300px;
+  max-width: 120px;
 }
 
 .captured-pieces h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
   color: #333;
+  white-space: nowrap;
 }
 
 .pieces-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .captured-piece {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.25rem 0.5rem;
   background-color: #fff;
   border: 2px solid #ddd;
   border-radius: 4px;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: bold;
 }
 
