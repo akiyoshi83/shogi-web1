@@ -52,20 +52,22 @@ function wouldBeInCheck(board: Board, from: Position, to: Position, player: Play
   return isInCheck(newBoard, player)
 }
 
-// 合法手を返す（王将のみ王手回避フィルタを適用、他の駒はそのまま）
+// 合法手を返す（全ての駒について、移動後に自玉が王手にならない手のみ返す）
 export function getLegalMoves(board: Board, from: Position): Position[] {
   const piece = board[from.row][from.col]
   if (!piece) return []
   const moves = getValidMoves(board, from)
-  if (piece.type === 'king') {
-    return moves.filter(to => !wouldBeInCheck(board, from, to, piece.player))
-  }
-  return moves
+  return moves.filter(to => !wouldBeInCheck(board, from, to, piece.player))
 }
 
-// 持ち駒の打ち込み先を返す（打ち込みルールのみ適用）
+// 持ち駒の打ち込み先を返す（打ち込みルール＋王手回避フィルタを適用）
 export function getLegalDropPositions(board: Board, pieceType: CapturablePieceType, player: Player): Position[] {
-  return getDropPositions(board, pieceType, player)
+  const positions = getDropPositions(board, pieceType, player)
+  return positions.filter(to => {
+    const newBoard = board.map(row => [...row])
+    newBoard[to.row][to.col] = { type: pieceType, player, isPromoted: false }
+    return !isInCheck(newBoard, player)
+  })
 }
 
 // 移動後に王手が解消されるか判定（詰み判定用）

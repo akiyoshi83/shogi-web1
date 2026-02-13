@@ -131,7 +131,7 @@ describe('Checkmate Detection', () => {
   })
 
   describe('getLegalMoves', () => {
-    it('should allow non-king pieces to move freely even if it exposes king', () => {
+    it('should not allow pinned pieces to expose king', () => {
       const board = emptyBoard()
       // 先手の王が(8,4)、後手の飛車が(0,4)で縦のライン
       // 先手の銀が(5,4)にいて飛車の利きをブロックしている（ピン状態）
@@ -140,10 +140,9 @@ describe('Checkmate Detection', () => {
       board[5][4] = { type: 'silver', player: 'sente', isPromoted: false }
 
       const moves = getLegalMoves(board, { row: 5, col: 4 })
-      // 王将以外の駒はピンされていても自由に動ける
-      expect(moves.length).toBeGreaterThan(1)
-      // 4列目以外にも動ける
-      expect(moves.some(m => m.col !== 4)).toBe(true)
+      // ピンされた駒は王を危険にさらす手は打てない
+      // 銀は(4,4)にのみ移動可能（4列目に留まり飛車の利きをブロック）
+      expect(moves).toEqual([{ row: 4, col: 4 }])
     })
 
     it('should filter king moves into check', () => {
@@ -159,26 +158,59 @@ describe('Checkmate Detection', () => {
       expect(moves.length).toBeGreaterThan(0)
     })
 
-    it('should not filter non-king pieces at all', () => {
+    it('should allow non-king pieces to move freely when not pinned', () => {
       const board = emptyBoard()
       board[8][4] = { type: 'king', player: 'sente', isPromoted: false }
       board[4][4] = { type: 'rook', player: 'sente', isPromoted: false }
 
       const moves = getLegalMoves(board, { row: 4, col: 4 })
-      // 飛車は通常の移動ルール通りに動ける（王手フィルタなし）
+      // ピンされていない飛車は通常通り移動可能
       expect(moves.length).toBeGreaterThan(0)
+    })
+
+    it('should only allow check-resolving moves when in check', () => {
+      const board = emptyBoard()
+      // 先手の王が(8,4)、後手の飛車が(0,4)で王手
+      // 先手の飛車が(5,0)にいて(5,4)に移動して王手をブロックできる
+      board[8][4] = { type: 'king', player: 'sente', isPromoted: false }
+      board[0][4] = { type: 'rook', player: 'gote', isPromoted: false }
+      board[5][0] = { type: 'rook', player: 'sente', isPromoted: false }
+
+      const moves = getLegalMoves(board, { row: 5, col: 0 })
+      // 王手中なので、王手を解消する手のみ許可される
+      // 飛車は(5,4)に移動して合駒することでのみ王手を解消できる
+      expect(moves).toEqual([{ row: 5, col: 4 }])
     })
   })
 
   describe('getLegalDropPositions', () => {
-    it('should return all valid drop positions', () => {
+    it('should return all valid drop positions when not in check', () => {
       const board = emptyBoard()
       board[8][4] = { type: 'king', player: 'sente', isPromoted: false }
-      board[0][4] = { type: 'rook', player: 'gote', isPromoted: false }
-      // 持ち駒の打ち込みは通常の打ち込みルールに従う
+      board[0][0] = { type: 'rook', player: 'gote', isPromoted: false }
+      // 王手されていない場合、通常の打ち込みルールに従う
       const drops = getLegalDropPositions(board, 'gold', 'sente')
       // 空きマス全てに打てる（金なので行制限なし）
       expect(drops.length).toBeGreaterThan(0)
+    })
+
+    it('should only allow drops that resolve check when in check', () => {
+      const board = emptyBoard()
+      // 先手の王が(8,4)、後手の飛車が(0,4)で王手
+      board[8][4] = { type: 'king', player: 'sente', isPromoted: false }
+      board[0][4] = { type: 'rook', player: 'gote', isPromoted: false }
+      // 王の逃げ道を塞ぐ
+      board[8][3] = { type: 'pawn', player: 'sente', isPromoted: false }
+      board[8][5] = { type: 'pawn', player: 'sente', isPromoted: false }
+      board[7][3] = { type: 'pawn', player: 'sente', isPromoted: false }
+      board[7][5] = { type: 'pawn', player: 'sente', isPromoted: false }
+
+      const drops = getLegalDropPositions(board, 'gold', 'sente')
+      // 王手を解消する打ち込みのみ許可される（4列目の王と飛車の間に合駒）
+      expect(drops.length).toBeGreaterThan(0)
+      expect(drops.every(d => d.col === 4)).toBe(true)
+      // 飛車(0,4)と王(8,4)の間のマスのみ
+      expect(drops.every(d => d.row > 0 && d.row < 8)).toBe(true)
     })
   })
 
