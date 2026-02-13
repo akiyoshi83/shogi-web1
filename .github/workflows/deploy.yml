@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   # main ブランチのデプロイ
@@ -86,6 +87,48 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           destination_dir: branch/${{ steps.branch.outputs.safe_name }}
+
+      - name: Comment preview URL on PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREVIEW_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/branch/${{ steps.branch.outputs.safe_name }}/"
+
+          # ブランチに紐づく open な PR を検索
+          PR_NUMBER=$(gh pr list --head "${{ github.ref_name }}" --state open --json number --jq '.[0].number')
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No open PR found for branch '${{ github.ref_name }}'. Skipping comment."
+            exit 0
+          fi
+
+          echo "Found PR #${PR_NUMBER} for branch '${{ github.ref_name }}'"
+
+          # 重複防止用マーカー
+          MARKER="<!-- preview-url-comment -->"
+          COMMENT_BODY="${MARKER}
+          ## 🚀 Branch Preview
+
+          **Preview URL:** ${PREVIEW_URL}
+
+          _Commit: \`${{ github.sha }}\` | Updated: $(date -u '+%Y-%m-%d %H:%M:%S UTC')_"
+
+          # マーカーで既存コメントを検索
+          EXISTING_COMMENT_ID=$(gh api \
+            "repos/${{ github.repository }}/issues/${PR_NUMBER}/comments" \
+            --jq ".[] | select(.body | startswith(\"${MARKER}\")) | .id" \
+            | head -1)
+
+          if [ -n "$EXISTING_COMMENT_ID" ]; then
+            echo "Updating existing comment (ID: ${EXISTING_COMMENT_ID})"
+            gh api \
+              --method PATCH \
+              "repos/${{ github.repository }}/issues/comments/${EXISTING_COMMENT_ID}" \
+              -f body="${COMMENT_BODY}"
+          else
+            echo "Creating new comment on PR #${PR_NUMBER}"
+            gh pr comment "$PR_NUMBER" --body "${COMMENT_BODY}"
+          fi
 
   # ブランチ削除時のクリーンアップ
   cleanup-branch:
