@@ -26,12 +26,14 @@ export function useGameState() {
   const [winner, setWinner] = useState<Player | null>(null)
 
   const selectDropPiece = useCallback((pieceType: CapturablePieceType) => {
+    if (isGameOver) return
     setSelectedPosition(null)
     setSelectedDropPiece(pieceType)
     setValidMoves(getLegalDropPositions(board, pieceType, currentPlayer))
-  }, [board, currentPlayer])
+  }, [board, currentPlayer, isGameOver])
 
   const selectSquare = useCallback((position: Position) => {
+    if (isGameOver) return
     const piece = board[position.row][position.col]
 
     // 持ち駒が選択されている場合
@@ -169,7 +171,7 @@ export function useGameState() {
       setSelectedPosition(null)
       setValidMoves([])
     }
-  }, [board, selectedPosition, selectedDropPiece, validMoves, currentPlayer, capturedBySente, capturedByGote])
+  }, [board, selectedPosition, selectedDropPiece, validMoves, currentPlayer, capturedBySente, capturedByGote, isGameOver])
 
   const resetGame = useCallback(() => {
     setBoard(createInitialBoard())
