@@ -15,8 +15,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     concurrency:
-      group: pages-deploy-main
-      cancel-in-progress: true
+      group: pages-deploy
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,8 +50,8 @@ jobs:
     if: github.event_name == 'push' && github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     concurrency:
-      group: pages-deploy-${{ github.ref_name }}
-      cancel-in-progress: true
+      group: pages-deploy
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -91,6 +91,9 @@ jobs:
   cleanup-branch:
     if: github.event_name == 'delete'
     runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     steps:
       - name: Checkout gh-pages branch
         uses: actions/checkout@v4
