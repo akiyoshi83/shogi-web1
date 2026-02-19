@@ -33,6 +33,7 @@ function App() {
           player="gote"
           onPieceClick={selectDropPiece}
           isCurrentPlayer={currentPlayer === 'gote'}
+          isGameOver={isGameOver}
         />
 
         <Board
@@ -40,6 +41,7 @@ function App() {
           selectedPosition={selectedPosition}
           validMoves={validMoves}
           onSquareClick={selectSquare}
+          isGameOver={isGameOver}
         />
 
         <CapturedPieces
@@ -47,6 +49,7 @@ function App() {
           player="sente"
           onPieceClick={selectDropPiece}
           isCurrentPlayer={currentPlayer === 'sente'}
+          isGameOver={isGameOver}
         />
 
         <div className="game-info">

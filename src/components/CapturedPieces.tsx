@@ -6,6 +6,7 @@ interface CapturedPiecesProps {
   player: 'sente' | 'gote'
   onPieceClick?: (pieceType: CapturablePieceType) => void
   isCurrentPlayer: boolean
+  isGameOver: boolean
 }
 
 const pieceToJapanese: Record<CapturablePieceType, string> = {
@@ -20,7 +21,7 @@ const pieceToJapanese: Record<CapturablePieceType, string> = {
 
 const pieceOrder: CapturablePieceType[] = ['rook', 'bishop', 'gold', 'silver', 'knight', 'lance', 'pawn']
 
-function CapturedPieces({ capturedPieces, player, onPieceClick, isCurrentPlayer }: CapturedPiecesProps) {
+function CapturedPieces({ capturedPieces, player, onPieceClick, isCurrentPlayer, isGameOver }: CapturedPiecesProps) {
   return (
     <div className={`captured-pieces ${player}`}>
       <h3>{player === 'sente' ? '▲ 先手の持ち駒' : '△ 後手の持ち駒'}</h3>
@@ -32,8 +33,8 @@ function CapturedPieces({ capturedPieces, player, onPieceClick, isCurrentPlayer 
           return (
             <div
               key={pieceType}
-              className={`captured-piece ${isCurrentPlayer && onPieceClick ? 'clickable' : ''}`}
-              onClick={() => isCurrentPlayer && onPieceClick?.(pieceType)}
+              className={`captured-piece ${isCurrentPlayer && !isGameOver && onPieceClick ? 'clickable' : ''}`}
+              onClick={() => isCurrentPlayer && !isGameOver && onPieceClick?.(pieceType)}
             >
               <span className="piece-label">{pieceToJapanese[pieceType]}</span>
               {count > 1 && <span className="piece-count">{count}</span>}

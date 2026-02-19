@@ -6,6 +6,7 @@ interface BoardProps {
   selectedPosition: Position | null
   validMoves: Position[]
   onSquareClick: (position: Position) => void
+  isGameOver: boolean
 }
 
 // 駒の種類を日本語表記に変換
@@ -30,7 +31,7 @@ const promotedPieceToJapanese: Record<string, string> = {
   rook: '竜',
 }
 
-function Board({ board, selectedPosition, validMoves, onSquareClick }: BoardProps) {
+function Board({ board, selectedPosition, validMoves, onSquareClick, isGameOver }: BoardProps) {
   const isSelected = (row: number, col: number) => {
     return selectedPosition?.row === row && selectedPosition?.col === col
   }
@@ -50,7 +51,7 @@ function Board({ board, selectedPosition, validMoves, onSquareClick }: BoardProp
           return (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className={`square ${selected ? 'selected' : ''} ${validMove ? 'valid-move' : ''}`}
+              className={`square ${selected ? 'selected' : ''} ${validMove ? 'valid-move' : ''} ${isGameOver ? 'game-over' : ''}`}
               onClick={() => onSquareClick(position)}
             >
               {piece && (
