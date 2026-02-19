@@ -12,6 +12,7 @@ describe('Board Component', () => {
         selectedPosition={null}
         validMoves={[]}
         onSquareClick={() => {}}
+        isGameOver={false}
       />
     )
   })
@@ -24,6 +25,7 @@ describe('Board Component', () => {
         selectedPosition={null}
         validMoves={[]}
         onSquareClick={() => {}}
+        isGameOver={false}
       />
     )
 
@@ -39,6 +41,7 @@ describe('Board Component', () => {
         selectedPosition={null}
         validMoves={[]}
         onSquareClick={() => {}}
+        isGameOver={false}
       />
     )
 
@@ -56,6 +59,7 @@ describe('Board Component', () => {
         selectedPosition={selectedPosition}
         validMoves={[]}
         onSquareClick={() => {}}
+        isGameOver={false}
       />
     )
 
@@ -73,6 +77,7 @@ describe('Board Component', () => {
         selectedPosition={null}
         validMoves={validMoves}
         onSquareClick={() => {}}
+        isGameOver={false}
       />
     )
 
